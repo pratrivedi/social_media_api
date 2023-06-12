@@ -10,7 +10,7 @@ This project provides a set of APIs to implement various social media features. 
 - Docker Containerization: The project is containerized using Docker for easy deployment and scalability.
 - Test Cases: Test cases are implemented to ensure the correctness of the APIs.
 - Pre-commit Integration: Pre-commit hooks are set up to enforce code quality standards and formatting guidelines.
-
+- Swagger integration with djangoREST.
 ## Installation Instructions (Docker)
 
 To run the project using Docker, follow these steps:
@@ -28,6 +28,9 @@ To run the project using Docker, follow these steps:
    ```
 
 This will start the project and make it accessible at `http://localhost:8000`.
+
+# Swagger Link
+### `http://0.0.0.0:8000/api/schema/swagger-ui/`
 
 ## API Documentation
 
