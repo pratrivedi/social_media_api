@@ -98,6 +98,11 @@ class FriendshipRequestAPIView(viewsets.ModelViewSet):
         "put",
     ]
 
+    def get_serializer_class(self):
+        if self.action == "PUT":
+            return None
+        return super().get_serializer_class()
+
     def get_queryset(self):
         return Friendship.objects.filter(to_user=self.request.user, status="pending")
 

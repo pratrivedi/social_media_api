@@ -86,6 +86,9 @@ class UserLoginSerializer(serializers.Serializer):
         email = user[0].email
         user = authenticate(email=email, password=password)
 
+        if not user:
+            raise serializers.ValidationError("Invalid email or password.")
+
         if not user.is_active:
             raise serializers.ValidationError("This user account is inactive.")
 
@@ -113,6 +116,9 @@ class FriendshipRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friendship
         fields = ["id", "from_user", "to_user", "status"]
+        read_only_fields = [
+            "status",
+        ]
 
     def validate(self, validate_data):
         to_user = validate_data["to_user"]
@@ -131,7 +137,8 @@ class FriendshipRequestSerializer(serializers.ModelSerializer):
         latest_objs = Friendship.objects.filter(
             from_user=from_user, created_at__gt=one_minute_ago
         ).order_by("-created_at")
-        if len(latest_objs) > 3:
+
+        if len(latest_objs) > 2:
             raise serializers.ValidationError(
                 {"request": "Exceeded the limit of sending friend requests."}
             )
