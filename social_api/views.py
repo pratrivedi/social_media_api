@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema
 from rest_framework import filters, generics, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, MethodNotAllowed
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -85,6 +86,8 @@ class UserFriendsList(generics.ListAPIView):
         return User.objects.filter(username=self.request.user.username)
 
 
+@extend_schema(description="Send Friend Request to User by User Id", methods=["POST"])
+@extend_schema(description="Get Pending Friend Request", methods=["GET"])
 class FriendshipRequestAPIView(viewsets.ModelViewSet):
     """
     ViewSet for managing friendship requests.
@@ -98,14 +101,11 @@ class FriendshipRequestAPIView(viewsets.ModelViewSet):
         "put",
     ]
 
-    def get_serializer_class(self):
-        if self.action == "PUT":
-            return None
-        return super().get_serializer_class()
-
     def get_queryset(self):
         return Friendship.objects.filter(to_user=self.request.user, status="pending")
 
+    @extend_schema(request=None, methods=["PUT"])
+    @extend_schema(description="Accept friend request", methods=["PUT"])
     @action(detail=True, methods=["put"])
     def accept_request(self, request, *args, **kwargs):
         """
@@ -131,6 +131,8 @@ class FriendshipRequestAPIView(viewsets.ModelViewSet):
 
         return Response({"message": "Friendship request accepted."})
 
+    @extend_schema(request=None, methods=["PUT"])
+    @extend_schema(description="Reject friend request", methods=["PUT"])
     @action(detail=True, methods=["put"])
     def reject_request(self, request, *args, **kwargs):
         """
@@ -150,3 +152,10 @@ class FriendshipRequestAPIView(viewsets.ModelViewSet):
             friendship_request.save()
 
         return Response({"message": "Friendship request rejected."})
+
+    def update(self, request, *args, **kwargs):
+        """
+        Handle updates for the viewset.
+        Raises MethodNotAllowed exception for regular PUT requests.
+        """
+        raise MethodNotAllowed("PUT")
